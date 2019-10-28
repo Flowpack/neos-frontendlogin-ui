@@ -1,0 +1,70 @@
+{namespace neos=Neos\Neos\ViewHelpers}
+{namespace form=Neos\Form\ViewHelpers}
+<f:layout name="BackendSubModule"/>
+
+<f:section name="subtitle">
+    <h2>{neos:backend.translate(id: 'user.new.subtitle', value: 'Create a new user', source: 'Modules', package: 'Neos.Neos')}</h2>
+</f:section>
+
+<f:section name="content">
+    <f:form action="create" class="user user-edit" objectName="user">
+        <div class="neos-row-fluid">
+            <fieldset class="neos-span5">
+                <legend>{neos:backend.translate(id: 'users.new.userData', value: 'User Data', source: 'Modules', package: 'Neos.Neos')}</legend>
+
+                <div class="neos-control-group{f:validation.ifHasErrors(for: 'username', then: ' neos-error')}">
+                    <label class="neos-control-label" for="username">{neos:backend.translate(id: 'users.new.userData.username', value: 'Username', source: 'Modules', package: 'Neos.Neos')}</label>
+                    <div class="neos-controls">
+                        <f:form.textfield name="username" id="username" class="neos-span12" autofocus="true" required="true"/>
+                        <f:render partial="Module/Shared/FieldValidationResults" arguments="{fieldname: 'username'}"/>
+                    </div>
+                </div>
+
+                <div class="neos-control-group{f:validation.ifHasErrors(for: 'password', then: ' neos-error')}">
+                    <label class="neos-control-label" for="password[0]">{neos:backend.translate(id: 'users.new.userData.password', value: 'Password', source: 'Modules', package: 'Neos.Neos')}</label>
+                    <div class="neos-controls">
+                        <f:form.password name="password[0]" id="password[0]" class="neos-span12" additionalAttributes="{required: true}"/>
+                    </div>
+                </div>
+
+                <div class="neos-control-group{f:validation.ifHasErrors(for: 'password', then: ' neos-error')}">
+                    <label class="neos-control-label" for="password[1]">{neos:backend.translate(id: 'users.new.userData.repeatPassword', value: 'Repeat password', source: 'Modules', package: 'Neos.Neos')}</label>
+                    <div class="neos-controls">
+                        <f:form.password name="password[1]" id="password[1]" class="neos-span12" additionalAttributes="{required: true}"/>
+                        <f:render partial="Module/Shared/FieldValidationResults" arguments="{fieldname: 'password'}"/>
+                    </div>
+                </div>
+
+                <div class="neos-control-group{f:validation.ifHasErrors(for: 'expirationDate', then: ' neos-error')}">
+                    <label class="neos-control-label" for="expirationDate">{neos:backend.translate(id: 'users.account.expirationDate', value: 'Expiration Date', source: 'Modules', package: 'Flowpack.Neos.FrontendLogin.Ui')}</label>
+                    <div class="neos-controls">
+                        <form:form.datePicker value="{expirationDate}" name="expirationDate" id="expirationDate" class="neos-span12" enableDatePicker="false"/>
+                        <f:render partial="Module/Shared/FieldValidationResults" arguments="{fieldname: 'expirationDate'}"/>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="neos-span5 neos-offset1">
+                <legend>{neos:backend.translate(id: 'users.new.personalData', value: 'Personal Data', source: 'Modules', package: 'Neos.Neos')}</legend>
+
+                <div class="neos-control-group{f:validation.ifHasErrors(for: 'user.name', then: ' neos-error')}">
+                    <label class="neos-control-label" for="firstName">{neos:backend.translate(id: 'users.new.personalData.firstName', value: 'First Name', source: 'Modules', package: 'Neos.Neos')}</label>
+                    <div class="neos-controls">
+                        <f:form.textfield property="name.firstName" id="firstName" class="neos-span12" required="true"/>
+                        <f:render partial="Module/Shared/FieldValidationResults" arguments="{fieldname: 'user.name'}"/>
+                    </div>
+                </div>
+                <div class="neos-control-group">
+                    <label class="neos-control-label" for="lastName">{neos:backend.translate(id: 'users.new.personalData.lastName', value: 'Last Name', source: 'Modules', package: 'Neos.Neos')}</label>
+                    <div class="neos-controls">
+                        <f:form.textfield property="name.lastName" id="lastName" class="neos-span12"/>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+        <div class="neos-footer">
+            <f:link.action action="index" class="neos-button">{neos:backend.translate(id: 'cancel', value: 'Cancel', source: 'Modules', package: 'Neos.Neos')}</f:link.action>
+            <f:form.submit value="{neos:backend.translate(id: 'users.new.createButton', value: 'Create user', source: 'Modules', package: 'Neos.Neos')}" class="neos-button neos-button-primary"/>
+        </div>
+    </f:form>
+</f:section>

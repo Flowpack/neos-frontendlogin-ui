@@ -1,0 +1,26 @@
+privilegeTargets:
+
+  'Neos\Flow\Security\Authorization\Privilege\Method\MethodPrivilege':
+
+    'Flowpack.Neos.FrontendLogin.Ui:Module':
+      matcher: 'method(Flowpack\Neos\FrontendLogin\Ui\Controller\ModuleController->(?!initialize).*Action())'
+
+  'Neos\Neos\Security\Authorization\Privilege\ModulePrivilege':
+    'Flowpack.Neos.FrontendLogin.Ui:Backend.Module.Management.User':
+      matcher: 'management/frontenduser'
+
+roles:
+
+  'Neos.Neos:Administrator':
+    privileges:
+      - privilegeTarget: 'Flowpack.Neos.FrontendLogin.Ui:Backend.Module.Management.User'
+        permission: GRANT
+      - privilegeTarget: 'Flowpack.Neos.FrontendLogin.Ui:Module'
+        permission: GRANT
+
+  'Flowpack.Neos.FrontendLogin:UserAdministrator':
+    privileges:
+      - privilegeTarget: 'Flowpack.Neos.FrontendLogin.Ui:Backend.Module.Management.User'
+        permission: GRANT
+      - privilegeTarget: 'Flowpack.Neos.FrontendLogin.Ui:Module'
+        permission: GRANT

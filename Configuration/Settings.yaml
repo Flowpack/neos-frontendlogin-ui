@@ -1,0 +1,18 @@
+Neos:
+  Neos:
+    userInterface:
+      translation:
+        autoInclude:
+          Flowpack.Neos.FrontendLogin.Ui:
+            - 'Modules'
+
+    modules:
+      management:
+        submodules:
+          frontenduser:
+            label: 'Flowpack.Neos.FrontendLogin.Ui:Modules:module.label'
+            controller: '\Flowpack\Neos\FrontendLogin\Ui\Controller\ModuleController'
+            description: 'Flowpack.Neos.FrontendLogin.Ui:Modules:module.description'
+            icon: 'fa fa-users'
+            resource: 'Flowpack.Neos.FrontendLogin.Ui:Backend.Module'
+            privilegeTarget: 'Flowpack.Neos.FrontendLogin.Ui:Module'

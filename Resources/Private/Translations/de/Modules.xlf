@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file original="" product-name="Flowpack.Neos.FrontendLogin.Ui" source-language="en" target-language="de" datatype="plaintext">
+        <body>
+            <trans-unit id="module.label" xml:space="preserve">
+                <source>Frontend Users</source>
+                <target>Frontend-Benutzer</target>
+            </trans-unit>
+            <trans-unit id="module.description" xml:space="preserve">
+                <source>This module contains an overview of all frontend users and allows to add, edit or delete them.</source>
+                <target>Dieses Modul bietet einen Überblick über alle Frontend-Benutzer und erlaubt es, Nutzer anzulegen, zu bearbeiten und zu löschen.</target>
+            </trans-unit>
+
+            <trans-unit id="users.account.expirationDate" xml:space="preserve">
+                <source>Expiration Date</source>
+                <target>Ablaufdatum</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

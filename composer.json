@@ -1,0 +1,14 @@
+{
+    "name": "flowpack/neos-frontendlogin-ui",
+    "type": "neos-plugin",
+    "description": "Frontend for flowpack/neos-frontendlogin",
+    "license": "MIT",
+    "require": {
+        "flowpack/neos-frontendlogin": "^3.0 || ^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Flowpack\\Neos\\FrontendLogin\\Ui": "Classes"
+        }
+    }
+}
