@@ -18,7 +18,7 @@ roles:
       - privilegeTarget: 'Flowpack.Neos.FrontendLogin.Ui:Module'
         permission: GRANT
 
-  'Flowpack.Neos.FrontendLogin:UserAdministrator':
+  'Flowpack.Neos.FrontendLogin.Ui:UserAdministrator':
     privileges:
       - privilegeTarget: 'Flowpack.Neos.FrontendLogin.Ui:Backend.Module.Management.User'
         permission: GRANT
