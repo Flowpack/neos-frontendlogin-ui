@@ -15,6 +15,7 @@ namespace Flowpack\Neos\FrontendLogin\Ui\Controller;
 
 use Neos\Error\Messages\Message;
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Mvc\Exception\UnsupportedRequestTypeException;
 use Neos\Flow\Persistence\Exception\IllegalObjectTypeException;
 use Neos\Flow\Security\Account;
 use Neos\Flow\Security\AccountRepository;
@@ -69,18 +70,7 @@ class ModuleController extends AbstractModuleController
      */
     public function indexAction(): void
     {
-        $users = array_filter($this->userService->getUsers()->toArray(), static function (User $user): bool {
-            foreach ($user->getAccounts() as $account) {
-                foreach ($account->getRoles() as $role) {
-                    if ($role->getIdentifier() === 'Flowpack.Neos.FrontendLogin:User') {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        });
-
-        $this->view->assign('users', $users);
+        $this->view->assign('users', $this->findFrontendUsers());
     }
 
     /**
@@ -88,14 +78,19 @@ class ModuleController extends AbstractModuleController
      *
      * @param User $user
      * @return void
+     * @throws UnsupportedRequestTypeException
      */
     public function showAction(User $user): void
     {
-        $this->view->assignMultiple([
-            'currentUser' => $this->currentUser,
-            'user' => $user,
-            'expirationDate' => $user->getAccounts()->first()->getExpirationDate()
-        ]);
+        if ($this->checkUser($user)) {
+            $this->view->assignMultiple([
+                'currentUser' => $this->currentUser,
+                'user' => $user,
+                'expirationDate' => $user->getAccounts()->first()->getExpirationDate()
+            ]);
+        } else {
+            $this->throwStatus(403, 'Not allowed to show that user');
+        }
     }
 
     /**
@@ -144,13 +139,18 @@ class ModuleController extends AbstractModuleController
      *
      * @param User $user
      * @return void
+     * @throws UnsupportedRequestTypeException
      */
     public function editAction(User $user): void
     {
-        $this->view->assignMultiple([
-            'currentUser' => $this->currentUser,
-            'user' => $user
-        ]);
+        if ($this->checkUser($user)) {
+            $this->view->assignMultiple([
+                'currentUser' => $this->currentUser,
+                'user' => $user
+            ]);
+        } else {
+            $this->throwStatus(403, 'Not allowed to edit that user');
+        }
     }
 
     /**
@@ -158,12 +158,17 @@ class ModuleController extends AbstractModuleController
      *
      * @param User $user The user to update, including updated data already (name, email address etc)
      * @return void
+     * @throws UnsupportedRequestTypeException
      */
     public function updateAction(User $user): void
     {
-        $this->userService->updateUser($user);
-        $this->addFlashMessage('The user "%s" has been updated.', 'User updated', Message::SEVERITY_OK, [$user->getName()->getFullName()], 1412374498);
-        $this->redirect('index');
+        if ($this->checkUser($user)) {
+            $this->userService->updateUser($user);
+            $this->addFlashMessage('The user "%s" has been updated.', 'User updated', Message::SEVERITY_OK, [$user->getName()->getFullName()], 1412374498);
+            $this->redirect('index');
+        } else {
+            $this->throwStatus(403, 'Not allowed to update that user');
+        }
     }
 
     /**
@@ -172,6 +177,7 @@ class ModuleController extends AbstractModuleController
      * @param User $user
      * @return void
      * @throws NeosDomainException
+     * @throws UnsupportedRequestTypeException
      */
     public function deleteAction(User $user): void
     {
@@ -179,9 +185,14 @@ class ModuleController extends AbstractModuleController
             $this->addFlashMessage('You can not delete the currently logged in user', 'Current user can\'t be deleted', Message::SEVERITY_WARNING, [], 1412374546);
             $this->redirect('index');
         }
-        $this->userService->deleteUser($user);
-        $this->addFlashMessage('The user "%s" has been deleted.', 'User deleted', Message::SEVERITY_NOTICE, [htmlspecialchars($user->getName()->getFullName())], 1412374546);
-        $this->redirect('index');
+
+        if ($this->checkUser($user)) {
+            $this->userService->deleteUser($user);
+            $this->addFlashMessage('The user "%s" has been deleted.', 'User deleted', Message::SEVERITY_NOTICE, [htmlspecialchars($user->getName()->getFullName())], 1412374546);
+            $this->redirect('index');
+        } else {
+            $this->throwStatus(403, 'Not allowed to delete that user');
+        }
     }
 
     /**
@@ -190,14 +201,19 @@ class ModuleController extends AbstractModuleController
      * @param Account $account
      * @return void
      * @throws NeosDomainException
+     * @throws UnsupportedRequestTypeException
      */
     public function editAccountAction(Account $account): void
     {
-        $this->view->assignMultiple([
-            'account' => $account,
-            'user' => $this->userService->getUser($account->getAccountIdentifier(), $account->getAuthenticationProviderName()),
-            'expirationDate' => $account->getExpirationDate()
-        ]);
+        if ($this->checkAccount($account)) {
+            $this->view->assignMultiple([
+                'account' => $account,
+                'user' => $this->userService->getUser($account->getAccountIdentifier(), $account->getAuthenticationProviderName()),
+                'expirationDate' => $account->getExpirationDate()
+            ]);
+        } else {
+            $this->throwStatus(403, 'Not allowed to edit that account');
+        }
     }
 
     /**
@@ -209,17 +225,72 @@ class ModuleController extends AbstractModuleController
      * @return void
      * @throws NeosDomainException
      * @throws IllegalObjectTypeException
+     * @throws UnsupportedRequestTypeException
      */
     public function updateAccountAction(Account $account, array $password = []): void
     {
-        $user = $this->userService->getUser($account->getAccountIdentifier(), $account->getAuthenticationProviderName());
-        $password = array_shift($password);
-        if (trim((string)$password) !== '') {
-            $this->userService->setUserPassword($user, $password);
-        }
-        $this->accountRepository->update($account);
+        if ($this->checkAccount($account)) {
+            $user = $this->userService->getUser($account->getAccountIdentifier(), $account->getAuthenticationProviderName());
+            $password = array_shift($password);
+            if (trim((string)$password) !== '') {
+                $this->userService->setUserPassword($user, $password);
+            }
+            $this->accountRepository->update($account);
 
-        $this->addFlashMessage('The account has been updated.', 'Account updated', Message::SEVERITY_OK);
-        $this->redirect('edit', null, null, ['user' => $user]);
+            $this->addFlashMessage('The account has been updated.', 'Account updated', Message::SEVERITY_OK);
+            $this->redirect('edit', null, null, ['user' => $user]);
+        } else {
+            $this->throwStatus(403, 'Not allowed to update that account');
+        }
+    }
+
+    /**
+     * Returns all "frontend users", i.e. those having exactly one account with self::$authenticationProviderName
+     * and at least the role self::$roleIdentifier.
+     *
+     * @return User[]
+     */
+    protected function findFrontendUsers(): array
+    {
+        return array_filter($this->userService->getUsers()->toArray(), [$this, 'checkUser']);
+    }
+
+    /**
+     * Returns true if the given user is a "frontend users", i.e. has exactly one account with self::$authenticationProviderName
+     * and at least the role self::$roleIdentifier.
+     *
+     * @param User $user
+     * @return bool
+     */
+    protected function checkUser(User $user): bool
+    {
+        $accounts = $user->getAccounts();
+        if (count($accounts) === 1) {
+            /** @var Account $account */
+            $account = $accounts->first();
+            return $this->checkAccount($account);
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns true if the given user is a "frontend users", i.e. has exactly one account with self::$authenticationProviderName
+     * and at least the role self::$roleIdentifier.
+     *
+     * @param Account $account
+     * @return bool
+     */
+    protected function checkAccount(Account $account): bool
+    {
+        if ($account->getAuthenticationProviderName() === self::$authenticationProviderName) {
+            foreach ($account->getRoles() as $role) {
+                if ($role->getIdentifier() === self::$roleIdentifier) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
